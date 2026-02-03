@@ -23,7 +23,7 @@ public class InputCaptureScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        if (theManager == null) return;
         if (Input.touchCount > 0)
         {
             t = Input.GetTouch(0);
@@ -39,12 +39,13 @@ public class InputCaptureScript : MonoBehaviour
 
             switch (t.phase)
             {
-
                 case TouchPhase.Began:
                     timer = 0f;
                     hasMoved = false;
+
+                    theManager.TapAt(t.position);
                     break;
-                    
+
                 case TouchPhase.Stationary:
                     timer += Time.deltaTime;
                     break;
@@ -52,25 +53,19 @@ public class InputCaptureScript : MonoBehaviour
                 case TouchPhase.Moved:
                     timer += Time.deltaTime;
                     hasMoved = true;
+
+                    theManager.DragAt(t.position);
                     break;
 
                 case TouchPhase.Ended:
-                     if (timer < maxTimer && !hasMoved)
-                     {
-                       theManager.tap(t.position);
-                     }
-
-                    /*{
-                        print("TAP detected at: " + t.position );
-                    }
-                    else
+                    if (timer < maxTimer && !hasMoved)
                     {
-                        print("NOT a tap (long press or moved)");
-                    } */
+                        theManager.TapAt(t.position);
+                    }
                     break;
             }
 
-           
+
         }
     }
 }
