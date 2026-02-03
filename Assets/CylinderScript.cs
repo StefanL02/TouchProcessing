@@ -1,18 +1,41 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class CylinderScript : MonoBehaviour
+public class CylinderInteractable : MonoBehaviour, IInteractable
 {
-    // Start is called before the first frame update
+    private Renderer r;
+    private Color defaultColor;
+    private float fixedY;   
+
     void Start()
     {
-        
+        r = GetComponent<Renderer>();
+        defaultColor = r.material.color;
+
+        fixedY = transform.position.y;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void SelectObject()
     {
-        
+        r.material.color = Color.magenta;
+    }
+
+    public void UnselectObject()
+    {
+        r.material.color = defaultColor;
+    }
+
+    public void DragTo(Vector2 screenPos)
+    {
+        Vector3 worldPos = Camera.main.ScreenToWorldPoint(
+            new Vector3(
+                screenPos.x,
+                screenPos.y,
+                Camera.main.WorldToScreenPoint(transform.position).z
+            )
+        );
+
+        worldPos.y = fixedY;
+
+        transform.position = worldPos;
     }
 }

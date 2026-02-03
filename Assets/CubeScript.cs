@@ -1,18 +1,58 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class CubeScript : MonoBehaviour
+public class CubeScript : MonoBehaviour, IInteractable
 {
-    // Start is called before the first frame update
+    private Renderer r;
+    private float fixedY;        
+    private float landingZoneZ;  
+    private bool canMove = true;
+
     void Start()
     {
-        
+        r = GetComponent<Renderer>();
+        fixedY = transform.position.y; 
     }
 
-    // Update is called once per frame
-    void Update()
+    
+    public void SetLandingZoneZ(float z)
     {
+        landingZoneZ = z;
+    }
+
+    public void SelectObject()
+    {
+        if (canMove)
+        {
+            r.material.color = Color.yellow;
+        }
+    }
+
+    public void UnselectObject()
+    {
+        if (canMove)
+        {
+            r.material.color = Color.white;
+        }
+    }
+
+    public void DragTo(Vector2 screenPos)
+    {
+        if (!canMove) return;
+
         
+        Vector3 worldPos = Camera.main.ScreenToWorldPoint(
+            new Vector3(
+                screenPos.x,
+                screenPos.y,
+                Camera.main.WorldToScreenPoint(transform.position).z
+            )
+        );
+
+       
+        transform.position = new Vector3(
+            worldPos.x,      
+            fixedY,         
+            landingZoneZ    
+        );
     }
 }
