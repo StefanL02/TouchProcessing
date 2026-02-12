@@ -51,4 +51,14 @@ public class ManagerAction : MonoBehaviour
 
         selectedObject.DragTo(screenPos);
     }
+
+    public void StartPinch()
+    {
+        if (selectedObject != null) selectedObject.PrepareScale();
+    }
+
+    public void ScaleAt(float ratio)
+    {
+        if (selectedObject != null) selectedObject.ScaleTo(ratio);
+    }
 }

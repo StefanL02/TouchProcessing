@@ -5,6 +5,8 @@ public class SphereScript : MonoBehaviour, IInteractable
     private Renderer r;
     private Color defaultColor;
     private float fixedY;
+    private Vector3 scaleAtPinchStart;
+
 
     void Start()
     {
@@ -37,5 +39,17 @@ public class SphereScript : MonoBehaviour, IInteractable
         worldPos.y = fixedY;
 
         transform.position = worldPos;
+    }
+
+    public void PrepareScale()
+    {
+        // Capture the scale at the exact moment two fingers hit the screen
+        scaleAtPinchStart = transform.localScale;
+    }
+
+    public void ScaleTo(float scaleRatio)
+    {
+        //New Scale = (Current Distance / Start Distance) * Original Scale
+        transform.localScale = scaleAtPinchStart * scaleRatio;
     }
 }

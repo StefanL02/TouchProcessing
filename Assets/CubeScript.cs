@@ -55,4 +55,14 @@ public class CubeScript : MonoBehaviour, IInteractable
             landingZoneZ    
         );
     }
+
+    public void ScaleTo(float scaleRatio)
+    {
+        
+    }
+
+    public void PrepareScale()
+    {
+        
+    }
 }

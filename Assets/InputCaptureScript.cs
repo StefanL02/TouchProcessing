@@ -6,6 +6,8 @@ public class InputCaptureScript : MonoBehaviour
     float timer = 0f;
     float maxTimer = 1.0f;
     bool hasMoved = false;
+    float t_d_start;
+    bool isPinching = false;
 
     ManagerAction theManager;
 
@@ -17,37 +19,70 @@ public class InputCaptureScript : MonoBehaviour
     void Update()
     {
         if (theManager == null) return;
-        if (Input.touchCount == 0) return;
 
-        t = Input.GetTouch(0);
-
-        switch (t.phase)
+        // --- MULTI-TOUCH (PINCH TO SCALE) ---
+        if (Input.touchCount == 2)
         {
-            case TouchPhase.Began:
-                timer = 0f;
-                hasMoved = false;
+            Touch t1 = Input.GetTouch(0);
+            Touch t2 = Input.GetTouch(1);
 
-                theManager.TapAt(t.position); 
-                break;
+            if (!isPinching)
+            {
+                // Began: Calculate initial distance and lock starting scale
+                t_d_start = Vector2.Distance(t1.position, t2.position);
+                theManager.StartPinch();
+                isPinching = true;
+            }
+            else
+            {
+                // Update: Calculate ratio relative to start
+                float t_d_now = Vector2.Distance(t1.position, t2.position);
 
-            case TouchPhase.Stationary:
-                timer += Time.deltaTime;
-                break;
+                if (t_d_start > 0)
+                {
+                    float newScaleRatio = t_d_now / t_d_start;
+                    theManager.ScaleAt(newScaleRatio);
+                }
+            }
 
-            case TouchPhase.Moved:
-                timer += Time.deltaTime;
-                hasMoved = true;
+            
+            return;
+        }
 
-                theManager.DragAt(t.position); 
-                break;
+        // --- SINGLE-TOUCH (TAP & DRAG) ---
+        if (Input.touchCount == 1)
+        {
+            isPinching = false; // Reset pinch state
+            t = Input.GetTouch(0);
 
-            case TouchPhase.Ended:
-                // Optional: use this only if you want long-press detection later
-                if (timer >= maxTimer) Debug.Log("Long press");
+            switch (t.phase)
+            {
+                case TouchPhase.Began:
+                    timer = 0f;
+                    hasMoved = false;
+                    theManager.TapAt(t.position);
+                    break;
 
-                timer = 0f;
-                hasMoved = false;
-                break;
+                case TouchPhase.Stationary:
+                    timer += Time.deltaTime;
+                    break;
+
+                case TouchPhase.Moved:
+                    timer += Time.deltaTime;
+                    hasMoved = true;
+                    theManager.DragAt(t.position);
+                    break;
+
+                case TouchPhase.Ended:
+                    if (timer >= maxTimer) Debug.Log("Long press");
+                    timer = 0f;
+                    hasMoved = false;
+                    break;
+            }
+        }
+        else if (Input.touchCount == 0)
+        {
+            isPinching = false;
         }
     }
 }

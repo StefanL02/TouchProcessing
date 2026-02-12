@@ -38,4 +38,14 @@ public class CylinderInteractable : MonoBehaviour, IInteractable
 
         transform.position = worldPos;
     }
+
+    public void ScaleTo(float scaleRatio)
+    {
+        
+    }
+
+    public void PrepareScale()
+    {
+        
+    }
 }
