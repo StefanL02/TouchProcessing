@@ -2,69 +2,95 @@ using UnityEngine;
 
 public class InputCaptureScript : MonoBehaviour
 {
-    private Touch t;
-
-    private float timer = 0f;
-    [SerializeField] private float maxTapTime = 0.25f;     // tap threshold
-    [SerializeField] private float moveDeadzone = 6.0f;    // pixels
-
-    private bool hasMoved = false;
-    private bool beganDragging = false;
-
-    // Pinch
-    private float t_d_start;
-    private bool isPinching = false;
-
     private ManagerAction theManager;
+    private CameraManager cameraManager;
+
+    [SerializeField] private float maxTapTime = 0.25f;
+    [SerializeField] private float moveDeadzone = 6.0f;
+
+    private float timer;
+    private bool hasMoved;
+    private bool beganDragging;
+
+    // Two-finger gesture tracking
+    private bool isPinching;
+    private float prevPinchDistance;
+    
 
     void Start()
     {
-        theManager = FindObjectOfType<ManagerAction>();
+        theManager = FindFirstObjectByType<ManagerAction>();
+        cameraManager = FindFirstObjectByType<CameraManager>();
     }
 
     void Update()
     {
         if (theManager == null) return;
 
-        // --- PINCH TO SCALE ---
+        if (Input.touchCount != 2)
+            isPinching = false;
+
+        // --- 2 FINGERS: PINCH + TWIST ---
         if (Input.touchCount == 2)
         {
-            hasMoved = false;
-            timer = 0f;
-            beganDragging = false;
-
             Touch t1 = Input.GetTouch(0);
             Touch t2 = Input.GetTouch(1);
 
+            // Cancel single-touch drag
+            theManager.EndDrag();
+            beganDragging = false;
+
+            timer = 0f;
+            hasMoved = false;
+
+            float currentDistance = Vector2.Distance(t1.position, t2.position);
+
+            float currentAngle = Mathf.Atan2(
+                t1.position.y - t2.position.y,
+                t1.position.x - t2.position.x
+            ) * Mathf.Rad2Deg;
+
             if (!isPinching)
             {
-                t_d_start = Vector2.Distance(t1.position, t2.position);
-                theManager.StartPinch();
                 isPinching = true;
+
+                prevPinchDistance = currentDistance;
+
+                // Start object scaling
+                theManager.StartPinch();
+
+                // Start camera rotation ONLY if no object selected
+                if (cameraManager != null && !theManager.HasSelectedObject)
+                    cameraManager.BeginRotate(currentAngle);
             }
             else
             {
-                float t_d_now = Vector2.Distance(t1.position, t2.position);
-                if (t_d_start > 0f)
-                    theManager.ScaleAt(t_d_now / t_d_start);
+                // ----- PINCH -----
+                float pinchDelta = currentDistance - prevPinchDistance;
+                prevPinchDistance = currentDistance;
+
+                theManager.Pinch(pinchDelta);
+
+                // ----- TWIST -----
+                if (cameraManager != null && !theManager.HasSelectedObject)
+                    cameraManager.UpdateRotate(currentAngle);
             }
 
             return;
         }
 
-        // --- SINGLE TOUCH ---
+        // --- 1 FINGER ---
+        isPinching = false;
+
         if (Input.touchCount == 1)
         {
-            isPinching = false;
-            t = Input.GetTouch(0);
+            Touch t = Input.GetTouch(0);
 
             switch (t.phase)
             {
                 case TouchPhase.Began:
                     timer = 0f;
                     hasMoved = false;
-
-                    // Start drag IF finger began on an interactable
                     beganDragging = theManager.TryBeginDrag(t.position);
                     break;
 
@@ -74,9 +100,7 @@ public class InputCaptureScript : MonoBehaviour
                     if (t.deltaPosition.magnitude > moveDeadzone)
                         hasMoved = true;
 
-                    if (beganDragging)
-                        theManager.DragAt(t.position);
-
+                    theManager.DragAt(t.position, t.deltaPosition);
                     break;
 
                 case TouchPhase.Stationary:
@@ -87,7 +111,6 @@ public class InputCaptureScript : MonoBehaviour
                 case TouchPhase.Canceled:
                     theManager.EndDrag();
 
-                    // Tap only if it wasn't a drag and it was quick + still
                     if (!beganDragging && !hasMoved && timer <= maxTapTime)
                         theManager.TapAt(t.position);
 
@@ -99,10 +122,10 @@ public class InputCaptureScript : MonoBehaviour
         }
         else
         {
-            isPinching = false;
-            beganDragging = false;
+            // no touches
             timer = 0f;
             hasMoved = false;
+            beganDragging = false;
         }
     }
 }

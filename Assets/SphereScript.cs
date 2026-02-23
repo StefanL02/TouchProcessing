@@ -5,22 +5,18 @@ public class SphereScript : MonoBehaviour, IInteractable
     private Renderer r;
     private Color defaultColor;
 
-    [Header("Lock to Floor (optional)")]
     [SerializeField] private bool lockYToStart = true;
     private float fixedY;
 
-    // Dragging
     private Vector3 dragOffset;
     private float dragDepth;
 
-    // Scaling
     private Vector3 scaleAtPinchStart;
 
     void Start()
     {
         r = GetComponent<Renderer>();
         if (r != null) defaultColor = r.material.color;
-
         fixedY = transform.position.y;
     }
 
@@ -36,10 +32,7 @@ public class SphereScript : MonoBehaviour, IInteractable
 
     public void StartDrag(Vector3 hitPoint)
     {
-        // Preserve where you grabbed (prevents snapping)
         dragOffset = transform.position - hitPoint;
-
-        // IMPORTANT: use hitPoint depth, not center depth
         dragDepth = Camera.main.WorldToScreenPoint(hitPoint).z;
     }
 
@@ -49,9 +42,7 @@ public class SphereScript : MonoBehaviour, IInteractable
         Vector3 worldPos = Camera.main.ScreenToWorldPoint(screenPoint);
 
         Vector3 finalPos = worldPos + dragOffset;
-
-        if (lockYToStart)
-            finalPos.y = fixedY;
+        if (lockYToStart) finalPos.y = fixedY;
 
         transform.position = finalPos;
     }
