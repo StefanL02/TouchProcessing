@@ -65,4 +65,9 @@ public class CubeScript : MonoBehaviour, IInteractable
     {
         
     }
+
+    public void StartDrag(Vector3 hitPoint)
+    {
+        
+    }
 }

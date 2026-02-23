@@ -3,53 +3,83 @@ using UnityEngine;
 public class ManagerAction : MonoBehaviour
 {
     private IInteractable selectedObject;
-   
+    private IInteractable draggedObject;
 
-    public void TapAt(Vector2 screenPos)
+    // Called on TouchPhase.Began
+    public bool TryBeginDrag(Vector2 screenPos)
     {
         Ray ray = Camera.main.ScreenPointToRay(screenPos);
-        Debug.DrawLine(ray.origin, ray.origin + 100f * ray.direction, Color.red, 1f);
 
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
-            IInteractable newObj = hit.collider.GetComponent<IInteractable>();
-
-            if (newObj != null)
+            IInteractable hitObj = hit.collider.GetComponent<IInteractable>();
+            if (hitObj != null)
             {
-                if (selectedObject != null)
-                    selectedObject.UnselectObject();
+                // Start dragging THIS object
+                draggedObject = hitObj;
+                draggedObject.StartDrag(hit.point);
 
-                selectedObject = newObj;
-                selectedObject.SelectObject();
+                // Also select it (optional, but usually desired)
+                if (selectedObject != hitObj)
+                {
+                    if (selectedObject != null) selectedObject.UnselectObject();
+                    selectedObject = hitObj;
+                    selectedObject.SelectObject();
+                }
 
-                Debug.Log("Selected: " + hit.collider.name);
-            }
-            else
-            {
-                if (selectedObject != null)
-                    selectedObject.UnselectObject();
-
-                selectedObject = null;
-                Debug.Log("Hit something, but it's NOT interactable: " + hit.collider.name);
+                return true;
             }
         }
-        else
-        {
-            if (selectedObject != null)
-                selectedObject.UnselectObject();
 
-            selectedObject = null;
-            Debug.Log("No object hit");
-        }
+        draggedObject = null;
+        return false;
     }
 
     public void DragAt(Vector2 screenPos)
     {
-        if (selectedObject == null) return;
+        if (draggedObject == null) return;
+        draggedObject.DragTo(screenPos);
+    }
 
-        Debug.Log("Dragging at screen position: " + screenPos);
+    public void EndDrag()
+    {
+        draggedObject = null;
+    }
 
-        selectedObject.DragTo(screenPos);
+    // Called ONLY on TouchPhase.Ended when it was a real tap (not a drag)
+    public void TapAt(Vector2 screenPos)
+    {
+        Ray ray = Camera.main.ScreenPointToRay(screenPos);
+
+        if (Physics.Raycast(ray, out RaycastHit hit))
+        {
+            IInteractable hitObj = hit.collider.GetComponent<IInteractable>();
+
+            if (hitObj != null)
+            {
+                // Toggle selection
+                if (selectedObject == hitObj)
+                {
+                    selectedObject.UnselectObject();
+                    selectedObject = null;
+                }
+                else
+                {
+                    if (selectedObject != null) selectedObject.UnselectObject();
+                    selectedObject = hitObj;
+                    selectedObject.SelectObject();
+                }
+
+                return;
+            }
+        }
+
+        // Tap empty space (or floor) -> deselect (ONLY happens on Ended now)
+        if (selectedObject != null)
+        {
+            selectedObject.UnselectObject();
+            selectedObject = null;
+        }
     }
 
     public void StartPinch()

@@ -48,4 +48,9 @@ public class CylinderInteractable : MonoBehaviour, IInteractable
     {
         
     }
+
+    public void StartDrag(Vector3 hitPoint)
+    {
+        
+    }
 }

@@ -4,52 +4,65 @@ public class SphereScript : MonoBehaviour, IInteractable
 {
     private Renderer r;
     private Color defaultColor;
-    private float fixedY;
-    private Vector3 scaleAtPinchStart;
 
+    [Header("Lock to Floor (optional)")]
+    [SerializeField] private bool lockYToStart = true;
+    private float fixedY;
+
+    // Dragging
+    private Vector3 dragOffset;
+    private float dragDepth;
+
+    // Scaling
+    private Vector3 scaleAtPinchStart;
 
     void Start()
     {
         r = GetComponent<Renderer>();
-        defaultColor = r.material.color;
+        if (r != null) defaultColor = r.material.color;
 
         fixedY = transform.position.y;
     }
 
     public void SelectObject()
     {
-        r.material.color = Color.cyan;
+        if (r != null) r.material.color = Color.cyan;
     }
 
     public void UnselectObject()
     {
-        r.material.color = defaultColor;
+        if (r != null) r.material.color = defaultColor;
+    }
+
+    public void StartDrag(Vector3 hitPoint)
+    {
+        // Preserve where you grabbed (prevents snapping)
+        dragOffset = transform.position - hitPoint;
+
+        // IMPORTANT: use hitPoint depth, not center depth
+        dragDepth = Camera.main.WorldToScreenPoint(hitPoint).z;
     }
 
     public void DragTo(Vector2 screenPos)
     {
-        Vector3 worldPos = Camera.main.ScreenToWorldPoint(
-            new Vector3(
-                screenPos.x,
-                screenPos.y,
-                Camera.main.WorldToScreenPoint(transform.position).z
-            )
-        );
+        Vector3 screenPoint = new Vector3(screenPos.x, screenPos.y, dragDepth);
+        Vector3 worldPos = Camera.main.ScreenToWorldPoint(screenPoint);
 
-        worldPos.y = fixedY;
+        Vector3 finalPos = worldPos + dragOffset;
 
-        transform.position = worldPos;
+        if (lockYToStart)
+            finalPos.y = fixedY;
+
+        transform.position = finalPos;
     }
 
     public void PrepareScale()
     {
-        // Capture the scale at the exact moment two fingers hit the screen
         scaleAtPinchStart = transform.localScale;
     }
 
     public void ScaleTo(float scaleRatio)
     {
-        //New Scale = (Current Distance / Start Distance) * Original Scale
         transform.localScale = scaleAtPinchStart * scaleRatio;
     }
 }
