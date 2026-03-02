@@ -117,4 +117,10 @@ public class ManagerAction : MonoBehaviour
     {
         if (selectedObject != null) selectedObject.PrepareScale();
     }
+
+    public void ScaleSelected(float ratio)
+    {
+        if (selectedObject != null)
+            selectedObject.ScaleTo(ratio);
+    }
 }

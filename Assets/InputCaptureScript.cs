@@ -4,6 +4,7 @@ public class InputCaptureScript : MonoBehaviour
 {
     private ManagerAction theManager;
     private CameraManager cameraManager;
+    private float pinchStartDistance;
 
     [SerializeField] private float maxTapTime = 0.25f;
     [SerializeField] private float moveDeadzone = 6.0f;
@@ -36,7 +37,6 @@ public class InputCaptureScript : MonoBehaviour
             Touch t1 = Input.GetTouch(0);
             Touch t2 = Input.GetTouch(1);
 
-            // Cancel single-touch drag
             theManager.EndDrag();
             beganDragging = false;
 
@@ -54,24 +54,35 @@ public class InputCaptureScript : MonoBehaviour
             {
                 isPinching = true;
 
-                prevPinchDistance = currentDistance;
+                // store the distance at the start of the pinch
+                pinchStartDistance = currentDistance;
+                prevPinchDistance = currentDistance; // still useful for camera zoom delta
 
-                // Start object scaling
                 theManager.StartPinch();
 
-                // Start camera rotation ONLY if no object selected
                 if (cameraManager != null && !theManager.HasSelectedObject)
                     cameraManager.BeginRotate(currentAngle);
             }
             else
             {
-                // ----- PINCH -----
-                float pinchDelta = currentDistance - prevPinchDistance;
-                prevPinchDistance = currentDistance;
+                // ---- OBJECT SCALE (absolute ratio) OR CAMERA ZOOM (delta) ----
+                if (theManager.HasSelectedObject)
+                {
+                    if (pinchStartDistance > 0.001f)
+                    {
+                        float ratio = currentDistance / pinchStartDistance;
+                        theManager.ScaleSelected(ratio);
+                    }
+                }
+                else
+                {
+                    float pinchDelta = currentDistance - prevPinchDistance;
+                    prevPinchDistance = currentDistance;
 
-                theManager.Pinch(pinchDelta);
+                    theManager.Pinch(pinchDelta); // camera zoom
+                }
 
-                // ----- TWIST -----
+                // ---- CAMERA TWIST (Style 1) ----
                 if (cameraManager != null && !theManager.HasSelectedObject)
                     cameraManager.UpdateRotate(currentAngle);
             }

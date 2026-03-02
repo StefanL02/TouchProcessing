@@ -12,6 +12,8 @@ public class SphereScript : MonoBehaviour, IInteractable
     private float dragDepth;
 
     private Vector3 scaleAtPinchStart;
+    [SerializeField] private float minSize = 0.2f;
+    [SerializeField] private float maxSize = 5f;
 
     void Start()
     {
@@ -54,6 +56,8 @@ public class SphereScript : MonoBehaviour, IInteractable
 
     public void ScaleTo(float scaleRatio)
     {
-        transform.localScale = scaleAtPinchStart * scaleRatio;
+        Vector3 newScale = scaleAtPinchStart * scaleRatio;
+        float clamped = Mathf.Clamp(newScale.x, minSize, maxSize);
+        transform.localScale = new Vector3(clamped, clamped, clamped);
     }
 }
