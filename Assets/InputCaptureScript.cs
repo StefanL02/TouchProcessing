@@ -4,7 +4,7 @@ public class InputCaptureScript : MonoBehaviour
 {
     private ManagerAction theManager;
     private CameraManager cameraManager;
-    private float pinchStartDistance;
+    
 
     [SerializeField] private float maxTapTime = 0.25f;
     [SerializeField] private float moveDeadzone = 6.0f;
@@ -15,8 +15,10 @@ public class InputCaptureScript : MonoBehaviour
 
     // Two-finger gesture tracking
     private bool isPinching;
+    private float pinchStartDistance;
     private float prevPinchDistance;
-    
+    private float twistStartAngle;
+
 
     void Start()
     {
@@ -31,7 +33,7 @@ public class InputCaptureScript : MonoBehaviour
         if (Input.touchCount != 2)
             isPinching = false;
 
-        // --- 2 FINGERS: PINCH + TWIST ---
+        // 2 fingers pinch/twist
         if (Input.touchCount == 2)
         {
             Touch t1 = Input.GetTouch(0);
@@ -57,8 +59,10 @@ public class InputCaptureScript : MonoBehaviour
                 // store the distance at the start of the pinch
                 pinchStartDistance = currentDistance;
                 prevPinchDistance = currentDistance; // still useful for camera zoom delta
+                twistStartAngle = currentAngle;
 
                 theManager.StartPinch();
+                theManager.StartTwist();
 
                 if (cameraManager != null && !theManager.HasSelectedObject)
                     cameraManager.BeginRotate(currentAngle);
@@ -73,6 +77,9 @@ public class InputCaptureScript : MonoBehaviour
                         float ratio = currentDistance / pinchStartDistance;
                         theManager.ScaleSelected(ratio);
                     }
+
+                    float angleDelta = Mathf.DeltaAngle(twistStartAngle, currentAngle);
+                    theManager.RotateSelected(angleDelta);
                 }
                 else
                 {
@@ -80,17 +87,26 @@ public class InputCaptureScript : MonoBehaviour
                     prevPinchDistance = currentDistance;
 
                     theManager.Pinch(pinchDelta); // camera zoom
+
                 }
 
-                // ---- CAMERA TWIST (Style 1) ----
-                if (cameraManager != null && !theManager.HasSelectedObject)
-                    cameraManager.UpdateRotate(currentAngle);
+                // camera twist
+                if (!theManager.HasSelectedObject)
+                {
+                    float pinchDelta = currentDistance - prevPinchDistance;
+                    prevPinchDistance = currentDistance;
+
+                    theManager.Pinch(pinchDelta);
+
+                    if (cameraManager != null)
+                        cameraManager.UpdateRotate(currentAngle);
+                }
             }
 
             return;
         }
 
-        // --- 1 FINGER ---
+        // 1 finger
         isPinching = false;
 
         if (Input.touchCount == 1)

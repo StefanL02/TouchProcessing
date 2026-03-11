@@ -10,4 +10,6 @@ public interface IInteractable
 
     void PrepareScale();
     void ScaleTo(float scaleRatio);
+    void PrepareRotate();
+    void RotateTo(float angleDelta);
 }

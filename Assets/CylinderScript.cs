@@ -5,12 +5,15 @@ public class CylinderInteractable : MonoBehaviour, IInteractable
     private Renderer r;
     private Color defaultColor;
     private float fixedY;
+
     private Vector3 scaleAtPinchStart;
     [SerializeField] private float minSize = 0.2f;
     [SerializeField] private float maxSize = 5f;
 
     private Vector3 dragOffset;
     private float dragDepth;
+
+    private Quaternion rotationAtTwistStart;
 
     void Start()
     {
@@ -30,19 +33,26 @@ public class CylinderInteractable : MonoBehaviour, IInteractable
         r.material.color = defaultColor;
     }
 
+    public void StartDrag(Vector3 hitPoint)
+    {
+        dragOffset = transform.position - hitPoint;
+        dragDepth = Camera.main.WorldToScreenPoint(hitPoint).z;
+    }
+
     public void DragTo(Vector2 screenPos)
     {
-        Vector3 worldPos = Camera.main.ScreenToWorldPoint(
-            new Vector3(
-                screenPos.x,
-                screenPos.y,
-                Camera.main.WorldToScreenPoint(transform.position).z
-            )
-        );
+        Vector3 screenPoint = new Vector3(screenPos.x, screenPos.y, dragDepth);
+        Vector3 worldPos = Camera.main.ScreenToWorldPoint(screenPoint);
 
-        worldPos.y = fixedY;
+        Vector3 finalPos = worldPos + dragOffset;
+        finalPos.y = fixedY;
 
-        transform.position = worldPos;
+        transform.position = finalPos;
+    }
+
+    public void PrepareScale()
+    {
+        scaleAtPinchStart = transform.localScale;
     }
 
     public void ScaleTo(float scaleRatio)
@@ -52,14 +62,13 @@ public class CylinderInteractable : MonoBehaviour, IInteractable
         transform.localScale = new Vector3(clamped, clamped, clamped);
     }
 
-    public void PrepareScale()
+    public void PrepareRotate()
     {
-        scaleAtPinchStart = transform.localScale;
+        rotationAtTwistStart = transform.rotation;
     }
 
-    public void StartDrag(Vector3 hitPoint)
+    public void RotateTo(float angleDelta)
     {
-        dragOffset = transform.position - hitPoint;
-        dragDepth = Camera.main.WorldToScreenPoint(hitPoint).z;
+        transform.rotation = rotationAtTwistStart * Quaternion.AngleAxis(angleDelta, Vector3.up);
     }
 }

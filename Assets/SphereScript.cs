@@ -15,11 +15,18 @@ public class SphereScript : MonoBehaviour, IInteractable
     [SerializeField] private float minSize = 0.2f;
     [SerializeField] private float maxSize = 5f;
 
+    private Quaternion rotationAtTwistStart;
+
     void Start()
     {
         r = GetComponent<Renderer>();
         if (r != null) defaultColor = r.material.color;
         fixedY = transform.position.y;
+    }
+
+    void Update()
+    {
+        Debug.Log("Actual current rot: " + transform.rotation.eulerAngles);
     }
 
     public void SelectObject()
@@ -59,5 +66,17 @@ public class SphereScript : MonoBehaviour, IInteractable
         Vector3 newScale = scaleAtPinchStart * scaleRatio;
         float clamped = Mathf.Clamp(newScale.x, minSize, maxSize);
         transform.localScale = new Vector3(clamped, clamped, clamped);
+    }
+    public void PrepareRotate()
+    {
+        rotationAtTwistStart = transform.rotation;
+    }
+
+    public void RotateTo(float angleDelta)
+    {
+        Quaternion newRot = rotationAtTwistStart * Quaternion.AngleAxis(angleDelta, Vector3.up);
+        transform.rotation = newRot;
+
+        Debug.Log("Sphere new rot: " + transform.rotation.eulerAngles);
     }
 }

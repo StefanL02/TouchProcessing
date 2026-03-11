@@ -15,7 +15,6 @@ public class ManagerAction : MonoBehaviour
     public bool HasSelectedObject => selectedObject != null;
     public bool IsDraggingObject => draggedObject != null;
 
-    // Begin drag only if finger starts on interactable
     public bool TryBeginDrag(Vector2 screenPos)
     {
         Ray ray = Camera.main.ScreenPointToRay(screenPos);
@@ -23,6 +22,7 @@ public class ManagerAction : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
             IInteractable hitObj = hit.collider.GetComponent<IInteractable>();
+
             if (hitObj != null)
             {
                 draggedObject = hitObj;
@@ -30,10 +30,13 @@ public class ManagerAction : MonoBehaviour
 
                 if (selectedObject != hitObj)
                 {
-                    if (selectedObject != null) selectedObject.UnselectObject();
+                    if (selectedObject != null)
+                        selectedObject.UnselectObject();
+
                     selectedObject = hitObj;
                     selectedObject.SelectObject();
                 }
+
                 return true;
             }
         }
@@ -50,7 +53,6 @@ public class ManagerAction : MonoBehaviour
         }
         else
         {
-            // No object drag -> camera pan
             if (cameraManager != null)
                 cameraManager.Pan(deltaPixels);
         }
@@ -61,7 +63,6 @@ public class ManagerAction : MonoBehaviour
         draggedObject = null;
     }
 
-    // Tap selection toggle (call only on Ended when it was a tap)
     public void TapAt(Vector2 screenPos)
     {
         Ray ray = Camera.main.ScreenPointToRay(screenPos);
@@ -79,15 +80,17 @@ public class ManagerAction : MonoBehaviour
                 }
                 else
                 {
-                    if (selectedObject != null) selectedObject.UnselectObject();
+                    if (selectedObject != null)
+                        selectedObject.UnselectObject();
+
                     selectedObject = hitObj;
                     selectedObject.SelectObject();
                 }
+
                 return;
             }
         }
 
-        // Tap empty space -> deselect
         if (selectedObject != null)
         {
             selectedObject.UnselectObject();
@@ -95,32 +98,33 @@ public class ManagerAction : MonoBehaviour
         }
     }
 
-    // Pinch scale object, else zoom camera
-    public void Pinch(float pinchDeltaPixels)
-    {
-        if (selectedObject != null)
-        {
-            // Convert pixels to a gentle ratio
-            // ratio ~ 1 + small amount
-            float ratio = 1f + (pinchDeltaPixels * 0.002f);
-            selectedObject.ScaleTo(ratio);
-        }
-        else
-        {
-            if (cameraManager != null)
-                cameraManager.Zoom(pinchDeltaPixels);
-        }
-    }
-
-    // Tell object a new pinch started so it can cache scale
     public void StartPinch()
     {
-        if (selectedObject != null) selectedObject.PrepareScale();
+        if (selectedObject != null)
+            selectedObject.PrepareScale();
     }
 
     public void ScaleSelected(float ratio)
     {
         if (selectedObject != null)
             selectedObject.ScaleTo(ratio);
+    }
+
+    public void Pinch(float pinchDeltaPixels)
+    {
+        if (selectedObject == null && cameraManager != null)
+            cameraManager.Zoom(pinchDeltaPixels);
+    }
+
+    public void StartTwist()
+    {
+        if (selectedObject != null)
+            selectedObject.PrepareRotate();
+    }
+
+    public void RotateSelected(float angleDelta)
+    {
+        if (selectedObject != null)
+            selectedObject.RotateTo(angleDelta);
     }
 }
