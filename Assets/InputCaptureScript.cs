@@ -69,7 +69,7 @@ public class InputCaptureScript : MonoBehaviour
             }
             else
             {
-                // ---- OBJECT SCALE (absolute ratio) OR CAMERA ZOOM (delta) ----
+                // object scale (absolute ratio) or camera zoom (delta) 
                 if (theManager.HasSelectedObject)
                 {
                     if (pinchStartDistance > 0.001f)

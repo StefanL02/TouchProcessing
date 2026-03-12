@@ -58,8 +58,8 @@ public class CubeScript : MonoBehaviour, IInteractable
         transform.position = new Vector3(
             finalPos.x,
             fixedY,
-            landingZoneZ
-        );
+            finalPos.z
+);
     }
 
     public void PrepareScale()
@@ -84,6 +84,6 @@ public class CubeScript : MonoBehaviour, IInteractable
     {
         transform.rotation =
             rotationAtTwistStart *
-            Quaternion.AngleAxis(angleDelta, Vector3.up);
+            Quaternion.AngleAxis(angleDelta, Vector3.forward);
     }
 }

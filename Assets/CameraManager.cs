@@ -13,31 +13,28 @@ public class CameraManager : MonoBehaviour
     [SerializeField] private float minFov = 20f;
     [SerializeField] private float maxFov = 80f;
 
-    // ----- STYLE 1 ROTATION -----
-    private Quaternion startRotation;
+    // rotation
+    private Quaternion rotationAtTwistStart;
     private float startAngle;
 
     public void BeginRotate(float currentAngle)
     {
-        if (rotationPoint == null) return;
-
-        startRotation = rotationPoint.rotation;
+        rotationAtTwistStart = transform.rotation;
         startAngle = currentAngle;
     }
 
     public void UpdateRotate(float currentAngle)
     {
-        if (rotationPoint == null) return;
+        float angleDelta = Mathf.DeltaAngle(startAngle, currentAngle);
 
-        float deltaAngle = Mathf.DeltaAngle(startAngle, currentAngle);
-
-        rotationPoint.rotation =
-            startRotation *
-            Quaternion.AngleAxis(deltaAngle, Vector3.up);
+        transform.rotation =
+            rotationAtTwistStart *
+            Quaternion.AngleAxis(angleDelta, Vector3.forward);
     }
 
-    // ----- PAN -----
-    public void Pan(Vector2 deltaPixels)
+
+// pan
+public void Pan(Vector2 deltaPixels)
     {
         Vector3 move = new Vector3(
             -deltaPixels.x * panSpeed,
@@ -48,7 +45,7 @@ public class CameraManager : MonoBehaviour
         transform.Translate(move, Space.Self);
     }
 
-    // ----- ZOOM (FOV) -----
+    // zoom
     public void Zoom(float pinchDeltaPixels)
     {
         Camera cam = Camera.main;

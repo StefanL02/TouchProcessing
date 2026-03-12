@@ -74,9 +74,8 @@ public class SphereScript : MonoBehaviour, IInteractable
 
     public void RotateTo(float angleDelta)
     {
-        Quaternion newRot = rotationAtTwistStart * Quaternion.AngleAxis(angleDelta, Vector3.up);
-        transform.rotation = newRot;
-
-        Debug.Log("Sphere new rot: " + transform.rotation.eulerAngles);
+        transform.rotation =
+            rotationAtTwistStart *
+            Quaternion.AngleAxis(angleDelta, Vector3.forward);
     }
 }

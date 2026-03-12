@@ -69,6 +69,8 @@ public class CylinderInteractable : MonoBehaviour, IInteractable
 
     public void RotateTo(float angleDelta)
     {
-        transform.rotation = rotationAtTwistStart * Quaternion.AngleAxis(angleDelta, Vector3.up);
+        transform.rotation =
+            rotationAtTwistStart *
+            Quaternion.AngleAxis(angleDelta, Vector3.forward);
     }
 }
