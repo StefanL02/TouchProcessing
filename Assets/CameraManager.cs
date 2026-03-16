@@ -16,6 +16,7 @@ public class CameraManager : MonoBehaviour
     // rotation
     private Quaternion rotationAtTwistStart;
     private float startAngle;
+    private float currentPitch = 0f;
 
     public void BeginRotate(float currentAngle)
     {
@@ -53,5 +54,16 @@ public void Pan(Vector2 deltaPixels)
 
         cam.fieldOfView -= pinchDeltaPixels * zoomSpeed;
         cam.fieldOfView = Mathf.Clamp(cam.fieldOfView, minFov, maxFov);
+    }
+
+    public void LookAround(Vector2 delta)
+    {
+        float pitch = -delta.y * 0.2f;
+        float yaw = delta.x * 0.2f;
+
+        currentPitch += pitch;
+        currentPitch = Mathf.Clamp(currentPitch, -60f, 60f);
+
+        transform.rotation = Quaternion.Euler(currentPitch, transform.eulerAngles.y + yaw, 0);
     }
 }

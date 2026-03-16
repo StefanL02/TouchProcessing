@@ -33,6 +33,20 @@ public class InputCaptureScript : MonoBehaviour
         if (Input.touchCount != 2)
             isPinching = false;
 
+        // 3 fingers camera tilt
+        if (Input.touchCount == 3)
+        {
+            Touch t = Input.GetTouch(0);
+
+            if (t.phase == TouchPhase.Moved)
+            {
+                if (cameraManager != null)
+                    cameraManager.LookAround(t.deltaPosition);
+            }
+
+            return;
+        }
+
         // 2 fingers pinch/twist
         if (Input.touchCount == 2)
         {
