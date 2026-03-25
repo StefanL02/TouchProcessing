@@ -4,50 +4,49 @@ public class CylinderInteractable : MonoBehaviour, IInteractable
 {
     private Renderer r;
     private Color defaultColor;
-    private float fixedY;
+
+    private Plane dragPlane;
+    private Vector3 dragOffset;
 
     private Vector3 scaleAtPinchStart;
+    private Quaternion rotationAtTwistStart;
+
     [SerializeField] private float minSize = 0.2f;
     [SerializeField] private float maxSize = 5f;
-
-    private Vector3 dragOffset;
-    private float dragDepth;
-
-    private Quaternion rotationAtTwistStart;
 
     void Start()
     {
         r = GetComponent<Renderer>();
-        defaultColor = r.material.color;
-
-        fixedY = transform.position.y;
+        if (r != null) defaultColor = r.material.color;
     }
 
     public void SelectObject()
     {
-        r.material.color = Color.magenta;
+        if (r != null) r.material.color = Color.magenta;
     }
 
     public void UnselectObject()
     {
-        r.material.color = defaultColor;
+        if (r != null) r.material.color = defaultColor;
     }
 
+    // WALL DRAG: drag on a camera-facing vertical plane
     public void StartDrag(Vector3 hitPoint)
     {
+        // Plane facing camera, passing through hit point
+        dragPlane = new Plane(Camera.main.transform.forward, hitPoint);
         dragOffset = transform.position - hitPoint;
-        dragDepth = Camera.main.WorldToScreenPoint(hitPoint).z;
     }
 
     public void DragTo(Vector2 screenPos)
     {
-        Vector3 screenPoint = new Vector3(screenPos.x, screenPos.y, dragDepth);
-        Vector3 worldPos = Camera.main.ScreenToWorldPoint(screenPoint);
+        Ray ray = Camera.main.ScreenPointToRay(screenPos);
 
-        Vector3 finalPos = worldPos + dragOffset;
-        finalPos.y = fixedY;
-
-        transform.position = finalPos;
+        if (dragPlane.Raycast(ray, out float enter))
+        {
+            Vector3 worldPos = ray.GetPoint(enter);
+            transform.position = worldPos + dragOffset;
+        }
     }
 
     public void PrepareScale()

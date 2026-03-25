@@ -3,63 +3,54 @@ using UnityEngine;
 public class CubeScript : MonoBehaviour, IInteractable
 {
     private Renderer r;
+    private Color defaultColor;
+
     private float fixedY;
-    private float landingZoneZ;
-    private bool canMove = true;
+    private Plane groundPlane;
+    private Vector3 dragOffset;
 
     private Vector3 scaleAtPinchStart;
+    private Quaternion rotationAtTwistStart;
 
     [SerializeField] private float minSize = 0.2f;
     [SerializeField] private float maxSize = 5f;
 
-    private Vector3 dragOffset;
-    private float dragDepth;
-
-    private Quaternion rotationAtTwistStart;
-
     void Start()
     {
         r = GetComponent<Renderer>();
-        fixedY = transform.position.y;
-    }
+        if (r != null) defaultColor = r.material.color;
 
-    public void SetLandingZoneZ(float z)
-    {
-        landingZoneZ = z;
+        fixedY = transform.position.y;
     }
 
     public void SelectObject()
     {
-        if (canMove)
-            r.material.color = Color.yellow;
+        if (r != null) r.material.color = Color.yellow;
     }
 
     public void UnselectObject()
     {
-        if (canMove)
-            r.material.color = Color.white;
+        if (r != null) r.material.color = defaultColor;
     }
 
+    // FLOOR DRAG: drag on horizontal plane under object
     public void StartDrag(Vector3 hitPoint)
     {
+        groundPlane = new Plane(Vector3.up, new Vector3(0f, fixedY, 0f));
         dragOffset = transform.position - hitPoint;
-        dragDepth = Camera.main.WorldToScreenPoint(hitPoint).z;
     }
 
     public void DragTo(Vector2 screenPos)
     {
-        if (!canMove) return;
+        Ray ray = Camera.main.ScreenPointToRay(screenPos);
 
-        Vector3 screenPoint = new Vector3(screenPos.x, screenPos.y, dragDepth);
-        Vector3 worldPos = Camera.main.ScreenToWorldPoint(screenPoint);
-
-        Vector3 finalPos = worldPos + dragOffset;
-
-        transform.position = new Vector3(
-            finalPos.x,
-            fixedY,
-            finalPos.z
-);
+        if (groundPlane.Raycast(ray, out float enter))
+        {
+            Vector3 worldPos = ray.GetPoint(enter);
+            Vector3 finalPos = worldPos + dragOffset;
+            finalPos.y = fixedY;
+            transform.position = finalPos;
+        }
     }
 
     public void PrepareScale()
@@ -71,7 +62,6 @@ public class CubeScript : MonoBehaviour, IInteractable
     {
         Vector3 newScale = scaleAtPinchStart * scaleRatio;
         float clamped = Mathf.Clamp(newScale.x, minSize, maxSize);
-
         transform.localScale = new Vector3(clamped, clamped, clamped);
     }
 

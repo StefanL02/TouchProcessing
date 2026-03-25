@@ -5,28 +5,19 @@ public class SphereScript : MonoBehaviour, IInteractable
     private Renderer r;
     private Color defaultColor;
 
-    [SerializeField] private bool lockYToStart = true;
-    private float fixedY;
-
     private Vector3 dragOffset;
     private float dragDepth;
 
     private Vector3 scaleAtPinchStart;
+    private Quaternion rotationAtTwistStart;
+
     [SerializeField] private float minSize = 0.2f;
     [SerializeField] private float maxSize = 5f;
-
-    private Quaternion rotationAtTwistStart;
 
     void Start()
     {
         r = GetComponent<Renderer>();
         if (r != null) defaultColor = r.material.color;
-        fixedY = transform.position.y;
-    }
-
-    void Update()
-    {
-        Debug.Log("Actual current rot: " + transform.rotation.eulerAngles);
     }
 
     public void SelectObject()
@@ -39,6 +30,7 @@ public class SphereScript : MonoBehaviour, IInteractable
         if (r != null) r.material.color = defaultColor;
     }
 
+    // FREE DRAG: keep object at same screen depth
     public void StartDrag(Vector3 hitPoint)
     {
         dragOffset = transform.position - hitPoint;
@@ -50,10 +42,7 @@ public class SphereScript : MonoBehaviour, IInteractable
         Vector3 screenPoint = new Vector3(screenPos.x, screenPos.y, dragDepth);
         Vector3 worldPos = Camera.main.ScreenToWorldPoint(screenPoint);
 
-        Vector3 finalPos = worldPos + dragOffset;
-        if (lockYToStart) finalPos.y = fixedY;
-
-        transform.position = finalPos;
+        transform.position = worldPos + dragOffset;
     }
 
     public void PrepareScale()
@@ -67,6 +56,7 @@ public class SphereScript : MonoBehaviour, IInteractable
         float clamped = Mathf.Clamp(newScale.x, minSize, maxSize);
         transform.localScale = new Vector3(clamped, clamped, clamped);
     }
+
     public void PrepareRotate()
     {
         rotationAtTwistStart = transform.rotation;
