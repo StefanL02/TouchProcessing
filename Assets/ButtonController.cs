@@ -53,6 +53,7 @@ private void Start()
         if (cameraManager == null) return;
 
         cameraManager.isGyro = !cameraManager.isGyro;
+        Debug.Log("Gyro toggled: " + cameraManager.isGyro);
         UpdateButtonUI();
     }
 

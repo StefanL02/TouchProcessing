@@ -17,7 +17,7 @@ public class CameraManager : MonoBehaviour
     [SerializeField] private float maxFov = 80f;
 
     [Header("Gyro Settings")]
-    [SerializeField] private float gyroRotationSpeed = 0.5f;
+    [SerializeField] private float gyroSmoothing = 3f;
 
     private Vector3 startPosition;
     private Quaternion startRotation;
@@ -25,13 +25,18 @@ public class CameraManager : MonoBehaviour
 
     private Quaternion rotationAtTwistStart;
     private float startAngle;
+
     private float currentPitch = 0f;
-    
+    private float currentYaw = 0f;
 
     void Start()
     {
         startPosition = transform.position;
         startRotation = transform.rotation;
+
+        Vector3 euler = transform.rotation.eulerAngles;
+        currentPitch = NormalizeAngle(euler.x);
+        currentYaw = NormalizeAngle(euler.y);
 
         if (Camera.main != null)
             startFov = Camera.main.fieldOfView;
@@ -43,14 +48,26 @@ public class CameraManager : MonoBehaviour
     {
         if (isGyro)
         {
-            float rotationSpeed = -Input.gyro.rotationRateUnbiased.z;
-            transform.Rotate(0f, 0f, rotationSpeed * gyroRotationSpeed);
+            Quaternion deviceRotation = GyroToUnity(Input.gyro.attitude);
+
+            // Smooth toward device rotation
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                deviceRotation,
+                gyroSmoothing * Time.deltaTime
+            );
         }
+    }
+
+    private Quaternion GyroToUnity(Quaternion q)
+    {
+        // Convert right-handed device coordinates to Unity coordinates
+        return new Quaternion(q.x, q.y, -q.z, -q.w);
     }
 
     public void BeginRotate(float currentAngle)
     {
-        if (!isRotatingAroundItself) return;
+        if (!isRotatingAroundItself || isGyro) return;
 
         rotationAtTwistStart = transform.rotation;
         startAngle = currentAngle;
@@ -58,7 +75,7 @@ public class CameraManager : MonoBehaviour
 
     public void UpdateRotate(float currentAngle)
     {
-        if (!isRotatingAroundItself) return;
+        if (!isRotatingAroundItself || isGyro) return;
 
         float angleDelta = Mathf.DeltaAngle(startAngle, currentAngle);
 
@@ -94,21 +111,33 @@ public class CameraManager : MonoBehaviour
         transform.position = startPosition;
         transform.rotation = startRotation;
 
+        Vector3 euler = startRotation.eulerAngles;
+        currentPitch = NormalizeAngle(euler.x);
+        currentYaw = NormalizeAngle(euler.y);
+
         if (Camera.main != null)
             Camera.main.fieldOfView = startFov;
     }
 
     public void LookAround(Vector2 delta)
     {
-        if (!isRotatingAroundItself) return;
+        if (!isRotatingAroundItself || isGyro) return;
 
         float pitch = -delta.y * 0.2f;
         float yaw = delta.x * 0.2f;
 
         currentPitch += pitch;
+        currentYaw += yaw;
+
         currentPitch = Mathf.Clamp(currentPitch, -60f, 60f);
 
-        transform.rotation = Quaternion.Euler(currentPitch, transform.eulerAngles.y + yaw, 0);
+        transform.rotation = Quaternion.Euler(currentPitch, currentYaw, 0f);
     }
 
+    private float NormalizeAngle(float angle)
+    {
+        while (angle > 180f) angle -= 360f;
+        while (angle < -180f) angle += 360f;
+        return angle;
+    }
 }
