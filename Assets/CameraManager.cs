@@ -7,9 +7,13 @@ public class CameraManager : MonoBehaviour
     public bool isGyro = false;
     public bool isZoom = true;
     public bool isMoving = true;
+    public bool isAccelerometer = false;
 
     [Header("Pan Settings")]
     [SerializeField] private float panSpeed = 0.0025f;
+
+    [Header("Accelerometer Settings")]
+    [SerializeField] private float accelerometerMoveSpeed = 2f;
 
     [Header("Zoom Settings")]
     [SerializeField] private float zoomSpeed = 0.08f;
@@ -56,6 +60,15 @@ public class CameraManager : MonoBehaviour
                 deviceRotation,
                 gyroSmoothing * Time.deltaTime
             );
+        }
+
+        if (isAccelerometer)
+        {
+            Vector3 acc = Input.acceleration;
+
+            // Move camera sideways and forward/back based on tilt
+            Vector3 move = new Vector3(acc.x, 0f, acc.y) * accelerometerMoveSpeed * Time.deltaTime;
+            transform.Translate(move, Space.World);
         }
     }
 

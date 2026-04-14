@@ -12,6 +12,7 @@ public class ButtonController : MonoBehaviour
     [SerializeField] private TMP_Text rotationButtonText;
     [SerializeField] private TMP_Text gyroButtonText;
     [SerializeField] private TMP_Text zoomButtonText;
+    [SerializeField] private TMP_Text accelerometerButtonText;
 
     [Header("Optional Button Images")]
     [SerializeField] private Image cameraRestartImage;
@@ -19,8 +20,9 @@ public class ButtonController : MonoBehaviour
     [SerializeField] private Image rotationButtonImage;
     [SerializeField] private Image gyroButtonImage;
     [SerializeField] private Image zoomButtonImage;
+    [SerializeField] private Image accelerometerButtonImage;
 
-private void Start()
+    private void Start()
     {
         UpdateButtonUI();
     }
@@ -65,6 +67,13 @@ private void Start()
         UpdateButtonUI();
     }
 
+    public void TurnOnOffAccelerometer()
+    {
+        if (cameraManager == null) return;
+
+        cameraManager.isAccelerometer = !cameraManager.isAccelerometer;
+        UpdateButtonUI();
+    }
     private void UpdateButtonUI()
     {
         if (cameraManager == null) return;
@@ -81,6 +90,9 @@ private void Start()
         if (zoomButtonText != null)
             zoomButtonText.text = cameraManager.isZoom ? "Zoom ON" : "Zoom OFF";
 
+        if (accelerometerButtonText != null)
+            accelerometerButtonText.text = cameraManager.isAccelerometer ? "Accelerometer ON" : "Accelerometer OFF";
+
         if (movementButtonImage != null)
             movementButtonImage.color = cameraManager.isMoving ? Color.green : Color.red;
 
@@ -92,5 +104,8 @@ private void Start()
 
         if (zoomButtonImage != null)
             zoomButtonImage.color = cameraManager.isZoom ? Color.green : Color.red;
+
+        if (accelerometerButtonImage != null)
+            accelerometerButtonImage.color = cameraManager.isAccelerometer ? Color.green : Color.red;
     }
 }
