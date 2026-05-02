@@ -7,9 +7,9 @@ public class AdManager : MonoBehaviour
     public static AdManager Instance { get; private set; }
 
     [Header("Android Ad Unit IDs")]
-    [SerializeField] private string bannerAdUnitId = "ca-app-pub-3940256099942544/6300978111";       // Test ID
-    [SerializeField] private string interstitialAdUnitId = "ca-app-pub-3940256099942544/1033173712"; // Test ID
-    [SerializeField] private string rewardedAdUnitId = "ca-app-pub-3940256099942544/5224354917";     // Test ID
+    [SerializeField] private string bannerAdUnitId = "ca-app-pub-6713247261707466/9283254410";       
+    [SerializeField] private string interstitialAdUnitId = "ca-app-pub-6713247261707466/4516966713"; 
+    [SerializeField] private string rewardedAdUnitId = "ca-app-pub-6713247261707466/9363145460";     
 
     private BannerView bannerView;
     private InterstitialAd interstitialAd;
@@ -43,9 +43,7 @@ public class AdManager : MonoBehaviour
         });
     }
 
-    // ─────────────────────────────────────────
     // BANNER
-    // ─────────────────────────────────────────
 
     private void LoadBanner()
     {
@@ -81,9 +79,7 @@ public class AdManager : MonoBehaviour
             bannerView.Hide();
     }
 
-    // ─────────────────────────────────────────
     // INTERSTITIAL
-    // ─────────────────────────────────────────
 
     private void LoadInterstitial()
     {
@@ -135,9 +131,7 @@ public class AdManager : MonoBehaviour
         }
     }
 
-    // ─────────────────────────────────────────
     // REWARDED
-    // ─────────────────────────────────────────
 
     private void LoadRewarded()
     {
@@ -192,10 +186,6 @@ public class AdManager : MonoBehaviour
             LoadRewarded();
         }
     }
-
-    // ─────────────────────────────────────────
-    // CLEANUP
-    // ─────────────────────────────────────────
 
     void OnDestroy()
     {

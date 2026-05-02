@@ -1,0 +1,9 @@
+lastUpgrade=20100
+proj.pluginVersion=2.1.0
+proj.AppId=652247759777
+and.BundleId=co.touch.stefan
+proj.classDir=Assets
+proj.ConstantsClassName=GPGSIds
+and.ResourceData=%3c%3fxml+version%3d%221.0%22+encoding%3d%22utf-8%22%3f%3e%0d%0a%3cresources%3e%0d%0a++++%3cstring+name%3d%22app_id%22%3e652247759777%3c%2fstring%3e%0d%0a++++%3cstring+name%3d%22package_name%22%3eco.touch.stefan%3c%2fstring%3e%0d%0a++++%3cstring+name%3d%22leaderboard_high_score%22%3eCgkIoff75_OSEAIQAQ%3c%2fstring%3e%0d%0a++++%3cstring+name%3d%22achievement_first_touch%22%3eCgkIoff75_OSEAIQAg%3c%2fstring%3e%0d%0a++++%3cstring+name%3d%22achievement_getting_warmed_up%22%3eCgkIoff75_OSEAIQAw%3c%2fstring%3e%0d%0a++++%3cstring+name%3d%22achievement_tap_master%22%3eCgkIoff75_OSEAIQBA%3c%2fstring%3e%0d%0a++++%3cstring+name%3d%22achievement_scaler%22%3eCgkIoff75_OSEAIQBQ%3c%2fstring%3e%0d%0a%3c%2fresources%3e
+and.ClientId=652247759777-g28lmfp1eaoek44pktf738ur41db11nt.apps.googleusercontent.com
+android.SetupDone=true

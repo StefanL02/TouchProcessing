@@ -19,21 +19,21 @@ public class AdButtonController : MonoBehaviour
             AdManager.Instance.OnRewardEarned -= HandleReward;
     }
 
-    // Hook this to your Interstitial UI button
+    
     public void OnInterstitialButtonPressed()
     {
         if (AdManager.Instance != null)
             AdManager.Instance.ShowInterstitial();
     }
 
-    // Hook this to your Rewarded UI button
+    
     public void OnRewardedButtonPressed()
     {
         if (AdManager.Instance != null)
             AdManager.Instance.ShowRewarded();
     }
 
-    // Hook this to a UI button if you want to toggle the banner
+    
     public void OnShowBannerPressed()
     {
         if (AdManager.Instance != null)
