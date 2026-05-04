@@ -108,4 +108,23 @@ public class ButtonController : MonoBehaviour
         if (accelerometerButtonImage != null)
             accelerometerButtonImage.color = cameraManager.isAccelerometer ? Color.green : Color.red;
     }
+
+    public void ShareScore()
+    {
+        int tapCount = TapCounter.Instance.GetTapCount();
+        string shareMessage = "I scored " + tapCount + " taps in TouchProcessing! Can you beat me?";
+
+        AndroidJavaClass intentClass = new AndroidJavaClass("android.content.Intent");
+        AndroidJavaObject intentObject = new AndroidJavaObject("android.content.Intent");
+
+        intentObject.Call<AndroidJavaObject>("setAction", intentClass.GetStatic<string>("ACTION_SEND"));
+        intentObject.Call<AndroidJavaObject>("setType", "text/plain");
+        intentObject.Call<AndroidJavaObject>("putExtra", intentClass.GetStatic<string>("EXTRA_TEXT"), shareMessage);
+
+        AndroidJavaClass unity = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+        AndroidJavaObject currentActivity = unity.GetStatic<AndroidJavaObject>("currentActivity");
+
+        AndroidJavaObject chooser = intentClass.CallStatic<AndroidJavaObject>("createChooser", intentObject, "Share your score!");
+        currentActivity.Call("startActivity", chooser);
+    }
 }

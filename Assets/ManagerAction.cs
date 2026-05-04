@@ -65,6 +65,7 @@ public class ManagerAction : MonoBehaviour
 
     public void TapAt(Vector2 screenPos)
     {
+      
         Ray ray = Camera.main.ScreenPointToRay(screenPos);
 
         if (Physics.Raycast(ray, out RaycastHit hit))
@@ -73,6 +74,7 @@ public class ManagerAction : MonoBehaviour
 
             if (hitObj != null)
             {
+                Debug.Log("Hit object: " + hitObj);
                 if (selectedObject == hitObj)
                 {
                     selectedObject.UnselectObject();
@@ -86,7 +88,8 @@ public class ManagerAction : MonoBehaviour
                     selectedObject = hitObj;
                     selectedObject.SelectObject();
                 }
-
+                TapCounter.Instance.RegisterTap();
+                
                 return;
             }
         }
@@ -107,7 +110,10 @@ public class ManagerAction : MonoBehaviour
     public void ScaleSelected(float ratio)
     {
         if (selectedObject != null)
+        {
             selectedObject.ScaleTo(ratio);
+            TapCounter.Instance.RegisterScale();
+        }
     }
 
     public void Pinch(float pinchDeltaPixels)

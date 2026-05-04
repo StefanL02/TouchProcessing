@@ -151,8 +151,8 @@ public class InputCaptureScript : MonoBehaviour
                 case TouchPhase.Ended:
                 case TouchPhase.Canceled:
                     theManager.EndDrag();
-
-                    if (!beganDragging && !hasMoved && timer <= maxTapTime)
+                 
+                    if (!hasMoved && timer <= maxTapTime)
                         theManager.TapAt(t.position);
 
                     timer = 0f;
